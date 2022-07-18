@@ -1,5 +1,16 @@
-// APB Master reading from address DEAD_CAFE at every posedge clock, writing to the same address the value of previous read + 1.
-
+/*
+APB is Arm based low performance protocol used for data transfer.
+APB State Machine has 3 states which depends upon 3 signals.
+psel_o: indicates of slave selection, 
+penable_o: indicates slave is ready for transfer, 
+pready_i: indicates transfer is done.
+IDLE State  : psel_o=0, penable_o=0
+SETUP State : psel_o=1, penable_o=0 
+ACCESS State: psel_o=1, penable_o=1
+In ACCESS state once transfer is done pready_i is high, if next valid requests it will goto SETUP state otherwise will goto IDLE state.
+  
+Below APB Master reading from address DEAD_CAFE at every posedge clock, writing to the same address the value of previous read + 1.
+*/
 
   module APBM(
   input  wire[1:0]  req_i,     /// req_i[1] indicates read/write 
