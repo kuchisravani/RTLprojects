@@ -1,3 +1,18 @@
+/*
+APB is Arm based low performance protocol used for data transfer.
+APB State Machine has 3 states which depends upon 3 signals.
+psel_o: indicates of slave selection, 
+penable_o: indicates slave is ready for transfer, 
+pready_i: indicates transfer is done.
+IDLE State  : psel_o=0, penable_o=0
+SETUP State : psel_o=1, penable_o=0 
+ACCESS State: psel_o=1, penable_o=1
+In ACCESS state once transfer is done pready_i is high, if next valid requests it will goto SETUP state otherwise will goto IDLE state.
+  
+Below APB Slave has memory interface. APB slave writes and reads data to and from memory interface.
+*/
+
+`default_nettype none
 module APB_SLV(
   input wire pclk_i,
   input wire prst_n,
@@ -25,7 +40,9 @@ module APB_SLV(
 
 endmodule
 
-`default_nettype none
+//////////////////////////////// Memory interface module ///////////////////////////////
+///memory interface module, used lfsr and edge detector to read and write into memory///
+
 module mem_int(
   input wire clk,
   input wire rst,
@@ -53,6 +70,7 @@ module mem_int(
       count_q<=nxt_count;
   end
   
+  //edge detector instantion//
   raise_fall rf_inst (.clk(clk), 
                  .rst(rst), 
                  .req_i(req_i),         
@@ -60,22 +78,25 @@ module mem_int(
                  .fall_o(/*notneeded*/)
                 );
   
+  //lfsr instantiation//
   lfsr lfsr_inst (.clk(clk), .rst(rst), .lfsr_o(lfsr_q));
   
-  assign nxt_count=req_rise_edge?lfsr_q:count+3'h1;
-  assign count=count_q;
+  assign nxt_count=req_rise_edge?lfsr_q:count+3'h1; // if req signal raises assign lfsr value otherwise increase count value upto 4 bits of count is 0000.
+  assign count=count_q;                       //count is used to add some random delays for transaction to complete and assert pready_o signal high
   
   always_comb begin
     if(~(|count) & memwr)
-      mem[addr_i]=wdata_i;
+      mem[addr_i]=wdata_i;                    //write when count is zero
   end
   
-  assign rdata_o = mem[addr_i] & {32{memrd}};
+  assign rdata_o = mem[addr_i] & {32{memrd}}; //read directly when read request happened
   
-  assign ready_o=~|count;
+  assign ready_o=~|count;                     // slave sends ready output when count is zero.  
   
 endmodule
 
+
+////////////// edge detector module /////////////
 module raise_fall(
   input clk,
   input rst,
@@ -96,6 +117,7 @@ module raise_fall(
   assign fall_o =req_ff & ~req_i;
 endmodule
 
+////////////// lfsr module /////////////
 module lfsr(
   input clk,
   input rst,
