@@ -22,7 +22,7 @@ module syn_fifo #(parameter DEP=4, parameter DWID=16)
   logic [DWID-1:0]  rdata_q;
   logic [PTR_WID:0] wrptr,wrptr_q;
   logic [PTR_WID:0]rdptr,rdptr_q;
-  logic [DEP-1:0][WID-1:0] fifo_mem;
+  logic [DEP-1:0][DWID-1:0] fifo_mem;
   
   
   assign empty_o   =(wrptr==rdptr);
