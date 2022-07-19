@@ -47,11 +47,11 @@ module syn_fifo #(parameter DEP=4, parameter DWID=16)
    rdptr_q=rdptr;
    rdata_q=fifo_mem[rdptr[PTR_WID-1:0]];
    case({rd_q, wr_q}) 
-     WR  : wrptr_q=wrptr + {PTR_WID{1'b1}};
-     RD  : rdptr_q=rdptr + {PTR_WID{1'b1}};
+     WR  : wrptr_q=wrptr + {PTR_WID{1'b0}, 1'b1};
+     RD  : rdptr_q=rdptr + {PTR_WID{1'b0}, 1'b1};
      BOTH: begin 
-           wrptr_q=wrptr + {PTR_WID{1'b1}}; 
-           rdptr_q=rdptr + {PTR_WID{1'b1}};
+           wrptr_q=wrptr + {PTR_WID{1'b0}, 1'b1}; 
+           rdptr_q=rdptr + {PTR_WID{1'b0}, 1'b1};
            end
    endcase
  end
