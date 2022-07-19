@@ -26,7 +26,7 @@ module syn_fifo #(parameter DEP=4, parameter DWID=16)
   
   
   assign empty_o   =(wrptr==rdptr);
-  assign overflow_o=(wrptr[DEP]!=rdptr[DEP]) && (wrptr[DEP-1:0]==rdptr[DEP-1:0]);
+  assign overflow_o=(wrptr[PTR_WID]!=rdptr[PTR_WID]) && (wrptr[PTR_WID-1:0]==rdptr[PTR_WID-1:0]);
   assign rd_q      =rd_i && ~empty_o;        //read request is valid only when fifo is not empty
   assign wr_q      =wr_i && ~overflow_o;     //write request is valid only when fifo is not full
   assign rdata     =rdata_q;
