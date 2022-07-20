@@ -1,9 +1,8 @@
 //synchronous fifo test bench
-
 module syn_fifo_tb();
   
-  localparam DEP=8;
-  localparam WID=32;
+  localparam DEP=4;
+  localparam WID=8;
   
   logic clk;
   logic rst;
@@ -30,19 +29,33 @@ module syn_fifo_tb();
     @(posedge clk);
     rst<=1'b1;
     @(posedge clk);
-    for(int i=0;i<32; i++) begin
-      wr_i<=$urandom_range(0,1);
-      rd_i<=$urandom_range(0,1);
-      if(wr_i)                    /// write data in next cycle if wr_i signal is high, dont write if wr_i is not enabled.
-        wdata<=$urandom_range(0,{WID{1'b1}});
+    
+    //both read and write
+    for(int i=0;i<10; i++) begin
+      wr_i<=1;
+      rd_i<=1;             
+      wdata<=$urandom_range(0,{WID{1'b1}});
       @(posedge clk);
     end
+    rd_i<=0;
+
+    //only write
+    for(int i=0;i<10; i++) begin
+      wr_i<=1'b1;
+      wdata<=$urandom_range(0,{WID{1'b1}});
+      @(posedge clk);
+    end
+    wr_i<=0;
+
+    //only read
+    for(int i=0;i<10; i++) begin
+      rd_i<=1'b1;
+      @(posedge clk);
+    end
+    
     $finish;
   end
-initial begin
-  #40 rst=1'b0;
-  #10 rst=1'b1;
-end
+
   initial begin 
     $dumpfile("dump.vcd");
     $dumpvars(0);
